@@ -1,4 +1,9 @@
 <script type="module">
+    <div class="flex gap-2 mb-3 justify-center">
+    <button onclick="setQuery('Tengo 10 min y: ')" class="text-[11px] bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full hover:bg-emerald-200 border border-emerald-200 transition">⚡ 10 min</button>
+    <button onclick="setQuery('Tengo 30 min y: ')" class="text-[11px] bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full hover:bg-emerald-200 border border-emerald-200 transition">🍳 30 min</button>
+    <button onclick="setQuery('Tengo sobras de: ')" class="text-[11px] bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full hover:bg-emerald-200 border border-emerald-200 transition">♻️ Aprovechar</button>
+</div>
     import { GoogleGenerativeAI } from "@google/generative-ai";
 
     // 1. Configuración de API (Verifica que sea la de AI Studio)
