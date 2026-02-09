@@ -1,21 +1,36 @@
 <script type="module">
     import { GoogleGenerativeAI } from "@google/generative-ai";
 
-    // 1. CONFIGURACIÓN
-    const API_KEY = "AIzaSyBH8FjvJN8w3_wwKcPhy9xu5cp84lWaMNM"; // Asegúrate de que no tenga espacios
+    // 1. Configuración de API (Verifica que sea la de AI Studio)
+    const API_KEY = 'AIzaSyBH8FjvJN8w3_wwKcPhy9xu5cp84lWaMNM'; 
     const genAI = new GoogleGenerativeAI(API_KEY);
 
-    // 2. EL MODELO CON EL PROMPT MAESTRO (Tu punto 4)
+    // 2. Definición del "Cerebro" (System Prompt)
+    const instructions = `Eres 'ZeroGasto AI', un sistema de inteligencia culinaria experto en ahorro.
+    TU MISIÓN: Crear recetas con lo mínimo posible para evitar desperdicio.
+    TU ESTILO: Directo, motivador y eficiente.
+    FORMATO OBLIGATORIO:
+    - 🍲 NOMBRE: [Nombre creativo]
+    - ⏱️ TIEMPO: [Minutos]
+    - 📝 PASOS: [Máximo 3 pasos numerados]
+    - 💰 TIP ZEROGASTO: [Consejo para ahorrar o reutilizar algo]`;
+
     const model = genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
-        // Aquí inyectamos la personalidad de Chef de Aprovechamiento
-        systemInstruction: "Actúa como un chef experto en cocina de aprovechamiento. Tu misión es ayudar a ahorrar y evitar el desperdicio. Inventa recetas creativas con los ingredientes que el usuario te dé. Estructura siempre: 1. Nombre creativo, 2. Tiempo estimado, 3. Instrucciones paso a paso, 4. Tip ZeroGasto para no desperdiciar.",
+        systemInstruction: instructions
     });
 
+    // Elementos de la interfaz
     const chatContainer = document.getElementById('chat-container');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
     let isProcessing = false;
+
+    // Función para los botones rápidos
+    window.setQuery = function(text) {
+        userInput.value = text;
+        userInput.focus();
+    };
 
     async function sendMessage() {
         const text = userInput.value.trim();
@@ -26,29 +41,15 @@
         appendMessage('user', text);
         userInput.value = '';
 
-        // Feedback visual de "pensando"
-        const loadingId = appendMessage('ai', 'Generando receta mágica... 🍳');
+        const loadingId = appendMessage('ai', 'Cocinando tu respuesta... ⏳');
 
         try {
-            // Generación de contenido con manejo de errores específico
             const result = await model.generateContent(text);
             const response = await result.response;
-            const responseText = response.text();
-            
-            // Reemplazamos el mensaje de carga con la respuesta real
-            updateMessage(loadingId, responseText);
-            
+            updateMessage(loadingId, response.text());
         } catch (error) {
-            console.error("Error detallado:", error);
-            let errorMsg = "Ocurrió un error. Revisa tu conexión o la API Key.";
-            
-            if (error.message.includes("429")) {
-                errorMsg = "Demasiadas peticiones. Espera un minuto, por favor.";
-            } else if (error.message.includes("API key not valid")) {
-                errorMsg = "La API Key no es válida. Verifícala en Google AI Studio.";
-            }
-            
-            updateMessage(loadingId, errorMsg);
+            console.error("Error:", error);
+            updateMessage(loadingId, "❌ Error de conexión. Revisa que tu API Key sea correcta y tengas internet.");
         } finally {
             isProcessing = false;
             sendBtn.disabled = false;
@@ -60,8 +61,8 @@
         const msgDiv = document.createElement('div');
         msgDiv.id = id;
         msgDiv.className = role === 'user' 
-            ? "bg-emerald-600 text-white p-4 rounded-2xl rounded-tr-none max-w-[80%] ml-auto shadow-sm animate-fade-in"
-            : "bg-white border border-emerald-100 text-slate-700 p-4 rounded-2xl rounded-tl-none max-w-[80%] shadow-sm whitespace-pre-wrap animate-fade-in";
+            ? "bg-emerald-600 text-white p-4 rounded-2xl rounded-tr-none max-w-[85%] ml-auto shadow-sm mb-4"
+            : "bg-white border border-emerald-100 text-slate-700 p-4 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm mb-4 whitespace-pre-wrap";
         msgDiv.innerText = text;
         chatContainer.appendChild(msgDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight;
